@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://bfegsrpt1upuo"
+path="res://.godot/imported/prison_gate001a.mdl-9cacf9c05f711bd198eaf8cfd3d4cbdf.tscn"
+
+[deps]
+
+source_file="res://models/prison_gate001a.mdl"
+dest_files=["res://.godot/imported/prison_gate001a.mdl-9cacf9c05f711bd198eaf8cfd3d4cbdf.tscn"]
+
+[params]
+

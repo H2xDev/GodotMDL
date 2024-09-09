@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://62cxtxtkre2y"
+path="res://.godot/imported/oildrum_crush.mdl-fe68b91abe1bfa0d8695317eaef76338.tscn"
+
+[deps]
+
+source_file="res://models/oildrum_crush.mdl"
+dest_files=["res://.godot/imported/oildrum_crush.mdl-fe68b91abe1bfa0d8695317eaef76338.tscn"]
+
+[params]
+

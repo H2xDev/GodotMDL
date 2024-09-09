@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://pantb4sw4eqa"
+path="res://.godot/imported/bodieshall128.mdl-317ee195f2ed8f75df5e9f2a9a6ddb10.tscn"
+
+[deps]
+
+source_file="res://models/bodieshall128.mdl"
+dest_files=["res://.godot/imported/bodieshall128.mdl-317ee195f2ed8f75df5e9f2a9a6ddb10.tscn"]
+
+[params]
+

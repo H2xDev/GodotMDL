@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://j1v3yxsq3re7"
+path="res://.godot/imported/v_shotgun.mdl-59595604259a63d80987f388d7b1f87f.tscn"
+
+[deps]
+
+source_file="res://models/v_shotgun.mdl"
+dest_files=["res://.godot/imported/v_shotgun.mdl-59595604259a63d80987f388d7b1f87f.tscn"]
+
+[params]
+

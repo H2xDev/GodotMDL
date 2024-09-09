@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://cbld4h7vlvwbn"
+path="res://.godot/imported/manhack.mdl-e532e1e57a8d12b37022e577d17ca108.tscn"
+
+[deps]
+
+source_file="res://models/manhack.mdl"
+dest_files=["res://.godot/imported/manhack.mdl-e532e1e57a8d12b37022e577d17ca108.tscn"]
+
+[params]
+

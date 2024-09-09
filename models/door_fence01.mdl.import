@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://cdh5h3fud534r"
+path="res://.godot/imported/door_fence01.mdl-46e082e4cbb6dab13cf27c9270aa1562.tscn"
+
+[deps]
+
+source_file="res://models/door_fence01.mdl"
+dest_files=["res://.godot/imported/door_fence01.mdl-46e082e4cbb6dab13cf27c9270aa1562.tscn"]
+
+[params]
+

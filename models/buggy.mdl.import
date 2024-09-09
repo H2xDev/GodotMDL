@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://b0n4hbuo58cas"
+path="res://.godot/imported/buggy.mdl-45e01abd6ced68c46d98ed5d4f4f7c56.tscn"
+
+[deps]
+
+source_file="res://models/buggy.mdl"
+dest_files=["res://.godot/imported/buggy.mdl-45e01abd6ced68c46d98ed5d4f4f7c56.tscn"]
+
+[params]
+

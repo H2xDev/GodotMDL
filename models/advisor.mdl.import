@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://d3xj5xyv6c0a6"
+path="res://.godot/imported/advisor.mdl-f79ffc845968239b053c499379044bd6.tscn"
+
+[deps]
+
+source_file="res://models/advisor.mdl"
+dest_files=["res://.godot/imported/advisor.mdl-f79ffc845968239b053c499379044bd6.tscn"]
+
+[params]
+

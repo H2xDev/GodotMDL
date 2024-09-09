@@ -1,0 +1,14 @@
+[remap]
+
+importer="MDL"
+type="PackedScene"
+uid="uid://fbkuvn832xxd"
+path="res://.godot/imported/bts_clipboard.mdl-5b6c7d94860442a159c6d4c6b201b5a1.tscn"
+
+[deps]
+
+source_file="res://models/bts_clipboard.mdl"
+dest_files=["res://.godot/imported/bts_clipboard.mdl-5b6c7d94860442a159c6d4c6b201b5a1.tscn"]
+
+[params]
+
