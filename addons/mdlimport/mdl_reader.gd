@@ -222,7 +222,7 @@ class MDLBone:
 		bonecontrollers 								= [ByteReader.Type.INT, 6],
 		pos 											= ByteReader.Type.VECTOR3,
 		quat 											= ByteReader.Type.QUATERNION,
-		rot 											= ByteReader.Type.VECTOR3,
+		rot 											= ByteReader.Type.EULER_VECTOR,
 		pos_scale 										= ByteReader.Type.VECTOR3,
 		rot_scale 										= ByteReader.Type.VECTOR3,
 		pos_to_bone 									= ByteReader.Type.MAT3X4,
@@ -236,6 +236,7 @@ class MDLBone:
 		unused 											= [ByteReader.Type.BYTE, 32],
 	}
 
+	var id: int;
 	var name_offset: int;
 	var name: String;
 	var parent: int;
@@ -258,8 +259,9 @@ class MDLBone:
 
 	var address: int = 0;
 
+	## Via \n for better readability
 	func _to_string():
-		return "MDLBone: {name: %s, parent: %d, bonecontrollers: %s, pos: %s, quat: %s, rot: %s, pos_scale: %s, rot_scale: %s, pos_to_bone: %s, q_alignment: %s, flags: %d, proc_type: %d, proc_index: %d, physics_bone: %d, surface_prop_index: %d, contents: %d, unused: %s}" % [name, parent, bonecontrollers, pos, quat, rot, pos_scale, rot_scale, pos_to_bone, q_alignment, flags, proc_type, proc_index, physics_bone, surface_prop_index, contents, unused];
+		return ("MDLBone: {\n\tname: %s, parent: %d, bonecontrollers: %s, pos: %s, quat: %s, rot: %s, pos_scale: %s, rot_scale: %s, pos_to_bone: %s, q_alignment: %s, flags: %d, proc_type: %d, proc_index: %d, physics_bone: %d, surface_prop_index: %d, contents: %d, unused: %s}".replace("%s, ", "%s,\n\t").replace("%d, ", "%d,\n\t") % [name, parent, bonecontrollers, pos, quat, rot, pos_scale, rot_scale, pos_to_bone, q_alignment, flags, proc_type, proc_index, physics_bone, surface_prop_index, contents, unused]);
 
 class MDLBoneController:
 	static var scheme:
@@ -472,9 +474,6 @@ var bone_controllers: Array = [];
 var body_parts: Array = [];
 var file: FileAccess;
 
-func done():
-	if file: file.close();
-
 func _init(source_path: String):
 	file = FileAccess.open(source_path, FileAccess.READ);
 	if file == null: return;
@@ -484,6 +483,8 @@ func _init(source_path: String):
 	_read_texture_data();
 	_read_bones();
 	_read_body_parts();
+
+	file.close();
 
 func _read_body_parts():
 	file.seek(header.bodypart_offset);
@@ -510,8 +511,11 @@ func _read_texture_data():
 func _read_bones():
 	bones = ByteReader.read_array(file, header, "bone_offset", "bone_count", MDLBone);
 
+	var bone_index = 0;
 	for bone in bones:
 		bone.name = ByteReader.read_string(file, bone.address + bone.name_offset);
 		bone.surface_prop = ByteReader.read_string(file, bone.address + bone.surface_prop_index);
+		bone.id = bone_index;
+		bone_index += 1;
 
 	bone_controllers = ByteReader.read_array(file, header, "bone_controller_offset", "bone_controller_count", MDLBoneController);

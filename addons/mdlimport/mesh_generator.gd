@@ -23,6 +23,8 @@ static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader, option
 				st.set_normal(vert.normal);
 				st.set_tangent(tangent);
 				st.set_uv(vert.uv);
+				st.set_bones(vert.bone_weight.bone_bytes);
+				st.set_weights(vert.bone_weight.weight_bytes);
 				st.add_vertex(vert.position * options.scale);
 	
 			for indice in strip_group.indices:
@@ -52,9 +54,46 @@ static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader, option
 		_process_body_part.call(body_part, body_part_index);
 		body_part_index += 1;
 
+
+	var skeleton = _generate_skeleton(mdl, options)
+	var skin = skeleton.create_skin_from_rest_transforms();
+
+	skeleton.name = "skeleton";
+	mesh_instance.add_child(skeleton);
+	skeleton.set_owner(mesh_instance);
+
+	mesh_instance.set_skeleton_path("skeleton");
+	mesh_instance.set_skin(skin);
 	mesh_instance.set_mesh(array_mesh);
 
 	return mesh_instance;
+
+static func _generate_skeleton(mdl: MDLReader, options: Dictionary) -> Skeleton3D:
+	var skeleton = Skeleton3D.new();
+
+	for bone in mdl.bones:
+		skeleton.add_bone(bone.name);
+
+	for bone in mdl.bones:
+		if bone.parent != -1:
+			skeleton.set_bone_parent(bone.id, bone.parent);
+
+		var parent_bone = mdl.bones[bone.parent];
+		var parent_transform = parent_bone.pos_to_bone if parent_bone else Transform3D.IDENTITY;
+		var target_transform = bone.pos_to_bone * parent_transform;
+		var additional_rotation = Basis.from_euler(bone.rot);
+		var transform = Transform3D(Basis(bone.quat), bone.pos * options.scale);
+
+		skeleton.set_bone_global_pose_override(bone.id, target_transform, 1.0);
+		skeleton.set_bone_pose_position(bone.id, transform.origin);
+		skeleton.set_bone_pose_rotation(bone.id, transform.basis.get_rotation_quaternion());
+
+		var target_rest_pose = skeleton.get_bone_pose(bone.id);
+
+		skeleton.set_bone_rest(bone.id, target_rest_pose);
+		skeleton.reset_bone_pose(bone.id);
+
+	return skeleton;
 
 static func _convert_vector(v: Vector3) -> Vector3:
 	return Vector3(v.x, v.z, -v.y);

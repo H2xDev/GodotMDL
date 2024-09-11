@@ -8,29 +8,14 @@ enum StripGroup {
 	SUPPRESS_HW_MORPH = 0x08,
 }
 
-func _get_importer_name():
-	return "MDL"
-
-func _get_visible_name():
-	return "MDL"
-
-func _get_recognized_extensions():
-	return ["mdl"];
-
-func _get_save_extension():
-	return "tscn";
-
-func _get_resource_type():
-	return "PackedScene";
-
-func _get_priority():
-	return 1;
-
-func _get_preset_count() -> int:
-	return 0;
-
-func _get_import_order():
-	return 1;
+func _get_importer_name(): return "MDL"
+func _get_visible_name(): return "MDL"
+func _get_recognized_extensions(): return ["mdl"];
+func _get_save_extension(): return "tscn";
+func _get_resource_type(): return "PackedScene";
+func _get_priority(): return 1;
+func _get_preset_count(): return 0;
+func _get_import_order(): return 1;
 
 func _get_import_options(str, int):
 	return [
@@ -48,17 +33,19 @@ func _get_import_options(str, int):
 		}
 	];
 
-func _get_option_visibility(path: String, optionName: StringName, options: Dictionary) -> bool:
-	return true;
+func _get_option_visibility(path: String, optionName: StringName, options: Dictionary): return true;
 
 func _import(mdl_path: String, save_path: String, options: Dictionary, _platform_variants, _gen_files):
 	var vtx_path = mdl_path.replace(".mdl", ".vtx");
 	var phy_path = mdl_path.replace(".mdl", ".phy");
 	var vvd_path = mdl_path.replace(".mdl", ".vvd");
+	var ani_path = mdl_path.replace(".mdl", ".ani");
 
 	var mdl = MDLReader.new(mdl_path);
 	var vtx = VTXReader.new(vtx_path);
 	var vvd = VVDReader.new(vvd_path);
+	var ani = ANIReader.new(mdl_path, mdl.header);
+
 	var model_name = mdl_path.get_file().get_basename().replace(".mdl", "");
 
 	if (!mdl or !vtx):
@@ -69,10 +56,6 @@ func _import(mdl_path: String, save_path: String, options: Dictionary, _platform
 
 	var scn = PackedScene.new();
 	var mesh_instance = MDLMeshGenerator.generate_mesh(mdl, vtx, vvd, options);
-	
-	mdl.done();
-	vtx.done();
-	vvd.done();
 
 	mesh_instance.set_name(model_name);
 

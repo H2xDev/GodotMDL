@@ -187,9 +187,6 @@ var header: VTXHeader;
 var body_parts = [];
 var file: FileAccess;
 
-func done():
-	if file: file.close();
-
 func _init(file_path: String) -> void:
 	file = FileAccess.open(file_path, FileAccess.READ);
 
@@ -203,6 +200,8 @@ func _init(file_path: String) -> void:
 	header = ByteReader.read_by_structure(file, VTXHeader);
 
 	_read_body_parts(header, file);
+
+	file.close();
 
 func _read_body_parts(header: VTXHeader, file: FileAccess):
 	body_parts = ByteReader.read_array(file, header, "body_part_offset", "num_body_parts", VTXBodyPart) as Array[VTXBodyPart];

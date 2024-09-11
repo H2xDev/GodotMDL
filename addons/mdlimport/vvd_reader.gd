@@ -53,7 +53,7 @@ class VVDBoneWeight:
 	static var scheme:
 		get: return {
 		weight									= [ByteReader.Type.FLOAT, 3],
-		bone									= [ByteReader.Type.CHAR, 3],
+		bone									= [ByteReader.Type.BYTE, 3],
 		num_bones								= ByteReader.Type.BYTE,
 	}
 
@@ -62,6 +62,15 @@ class VVDBoneWeight:
 	var num_bones: int;
 
 	var address: int = 0;
+	var bone_bytes: PackedInt32Array;
+	var weight_bytes: PackedFloat32Array;
+
+	func _on_read():
+		weight_bytes = PackedFloat32Array(weight);
+		weight_bytes.append(0.0);
+
+		bone_bytes = PackedInt32Array(bone);
+		bone_bytes.append(0);
 
 	func _to_string() -> String:
 		return "VVDBoneWeight: weight=%s, bone=%s, num_bones=%d" % [weight, bone, num_bones]
@@ -90,9 +99,6 @@ var vertices: Array[VVDVertexData] = [];
 var tangents: Array[Plane] = [];
 var file: FileAccess;
 
-func done():
-	if file: file.close();
-
 func _init(file_path: String) -> void:
 	file = FileAccess.open(file_path, FileAccess.READ);
 	if file == null: 
@@ -100,6 +106,8 @@ func _init(file_path: String) -> void:
 		return;
 
 	header = ByteReader.read_by_structure(file, VVDHeader);
+
+	print(header);
 
 	fixups = ByteReader.read_array(file, header, "fixup_table_offset", "num_fixups", VVDFixupTable);
 
@@ -121,6 +129,8 @@ func _init(file_path: String) -> void:
 	for fixup in fixups:
 		fixup.dist_index = copy_dist_index;
 		copy_dist_index += fixup.num_vertexes;
+
+	file.close();
 
 func find_vertex_index(vertex_id: int) -> int:
 	for fixup in fixups:
