@@ -33,18 +33,33 @@ func _get_import_order():
 	return 1;
 
 func _get_import_options(str, int):
-	return [];
+	return [
+		{
+			name = "scale",
+			default_value = 0.025,
+			type = TYPE_FLOAT,
+		},
+		{
+			name = "materials_root",
+			default_value = "",
+			type = TYPE_STRING,
+			property_hint = PROPERTY_HINT_GLOBAL_DIR,
+			hint_string = "Materials Root",
+		}
+	];
 
-func _import(source_path, save_path, options, _platform_variants, _gen_files):
-	var vtx_path = source_path.replace(".mdl", ".vtx");
+func _get_option_visibility(path: String, optionName: StringName, options: Dictionary) -> bool:
+	return true;
 
-	var phy_path = source_path.replace(".mdl", ".phy");
-	var vvd_path = source_path.replace(".mdl", ".vvd");
+func _import(mdl_path: String, save_path: String, options: Dictionary, _platform_variants, _gen_files):
+	var vtx_path = mdl_path.replace(".mdl", ".vtx");
+	var phy_path = mdl_path.replace(".mdl", ".phy");
+	var vvd_path = mdl_path.replace(".mdl", ".vvd");
 
-	var mdl = MDLReader.new(source_path);
+	var mdl = MDLReader.new(mdl_path);
 	var vtx = VTXReader.new(vtx_path);
 	var vvd = VVDReader.new(vvd_path);
-	var model_name = source_path.get_file().get_basename().replace(".mdl", "");
+	var model_name = mdl_path.get_file().get_basename().replace(".mdl", "");
 
 	if (!mdl or !vtx):
 		push_error("Error while reading MDL or VTX file.");
@@ -53,7 +68,7 @@ func _import(source_path, save_path, options, _platform_variants, _gen_files):
 	# var phy = PHYReader.new(phy_path);
 
 	var scn = PackedScene.new();
-	var mesh_instance = MDLMeshGenerator.generate_mesh(mdl, vtx, vvd);
+	var mesh_instance = MDLMeshGenerator.generate_mesh(mdl, vtx, vvd, options);
 	
 	mdl.done();
 	vtx.done();

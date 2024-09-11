@@ -1,6 +1,6 @@
 class_name MDLMeshGenerator extends RefCounted
 
-static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader):
+static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader, options: Dictionary) -> MeshInstance3D:
 	var mesh_instance = MeshInstance3D.new();
 	var array_mesh = ArrayMesh.new();
 
@@ -20,10 +20,10 @@ static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader):
 				var vert = vvd.vertices[vid];
 				var tangent = vvd.tangents[vid];
 	
-				st.set_normal(_convert_vector(vert.normal));
+				st.set_normal(vert.normal);
 				st.set_tangent(tangent);
 				st.set_uv(vert.uv);
-				st.add_vertex(_convert_vector(vert.position));
+				st.add_vertex(vert.position * options.scale);
 	
 			for indice in strip_group.indices:
 				st.add_index(indice);

@@ -33,8 +33,7 @@ class VTXHeader extends RefCounted:
 	var num_body_parts: int = 0;
 	var body_part_offset: int = 0;
 
-	static var size:
-		get: return 36;
+	var address: int = 0;
 
 	func _to_string() -> String:
 		return "VTXHeader: {version: %d, vertex_cache_size: %d, max_bones_per_strip: %d, max_bones_per_tri: %d, max_bones_per_vertex: %d, check_sum: %d, num_lods: %d, material_replacement_list_offset: %d, num_body_parts: %d, body_part_offset: %d}" % [version, vertex_cache_size, max_bones_per_strip, max_bones_per_tri, max_bones_per_vertex, check_sum, num_lods, material_replacement_list_offset, num_body_parts, body_part_offset];
@@ -46,13 +45,11 @@ class VTXBodyPart extends RefCounted:
 		model_offset 									= ByteReader.Type.INT,
 	}
 
-	static var size:
-		get: return 8;
-
-	var address = 0;
 	var num_models: int;
 	var model_offset: int;
-	var models = [];
+
+	var models: Array = [];
+	var address = 0;
 
 	func _to_string() -> String:
 		return "VTXBodyPart: {num_models: %d, model_offset: %d}" % [num_models, model_offset];
@@ -64,11 +61,11 @@ class VTXModel extends RefCounted:
 		lod_offset 										= ByteReader.Type.INT,
 	}
 
-	var num_lods = 0;
-	var lod_offset = 0;
+	var num_lods: int = 0;
+	var lod_offset: int = 0;
 
 	var address = 0;
-	var lods = [];
+	var lods: Array = [];
 
 	func _to_string() -> String:
 		return "VTXModel: {num_lods: %d, lod_offset: %d}" % [num_lods, lod_offset];
@@ -81,15 +78,12 @@ class VTXLod extends RefCounted:
 		switch_point 									= ByteReader.Type.FLOAT,
 	}
 
-	static var size:
-		get: return 12;
-
 	var num_meshes: int = 0;
 	var mesh_offset: int = 0;
 	var switch_point: float;
 
 	var address: int = 0;
-	var meshes = [];
+	var meshes: Array = [];
 
 	func _to_string() -> String:
 		return "VTXLod: {num_meshes: %d, mesh_offset: %d, switch_point: %f}" % [num_meshes, mesh_offset, switch_point];
@@ -102,16 +96,13 @@ class VTXMesh extends RefCounted:
 		flags 											= ByteReader.Type.BYTE,
 	}
 
-	static var size: int:
-		get: return 9;
-
 	var num_strip_groups: int;
 	var strip_group_offset: int;
 	var flags: int;
 
 	var address: int = 0;
 	var idx_base: int = 0;
-	var strip_groups: Array[VTXStripGroup] = [];
+	var strip_groups: Array = [];
 
 	func _to_string() -> String:
 		return "VTXMesh: {num_strip_groups: %d, strip_group_offset: %d, flags: %d}" % [num_strip_groups, strip_group_offset, flags];
@@ -123,13 +114,10 @@ class VTXStripGroup extends RefCounted:
 		vert_offset 									= ByteReader.Type.INT,
 		num_indices 									= ByteReader.Type.INT,
 		index_offset 									= ByteReader.Type.INT,
-		num_strips 									= ByteReader.Type.INT,
+		num_strips 										= ByteReader.Type.INT,
 		strip_offset 									= ByteReader.Type.INT,
 		flags 											= ByteReader.Type.BYTE,
 	}
-
-	static var size:
-		get: return 17;
 
 	var num_verts: int;
 	var vert_offset: int;
@@ -143,8 +131,8 @@ class VTXStripGroup extends RefCounted:
 
 	var address: int = 0;
 	var indices: Array[int] = [];
-	var vertices: Array[VTXVertex] = [];
-	var strips: Array[VTXStripHeader] = [];
+	var vertices: Array = [];
+	var strips: Array = [];
 
 	func _to_string() -> String:
 		return "VTXStripGroup: {num_verts: %d, vert_offset: %d, num_indices: %d, index_offset: %d, num_strips: %d, strip_offset: %d, flags: %d, unused: %d, unused2: %d}" % [num_verts, vert_offset, num_indices, index_offset, num_strips, strip_offset, flags, unused, unused2];
@@ -162,9 +150,6 @@ class VTXStripHeader extends RefCounted:
 		bone_state_change_offset 						= ByteReader.Type.INT,
 	}
 
-	static var size:
-		get: return 27;
-
 	var num_indices: int;
 	var index_offset: int;
 	var num_verts: int;
@@ -173,6 +158,7 @@ class VTXStripHeader extends RefCounted:
 	var flags: int;
 	var num_bone_state_changes: int;
 	var bone_state_change_offset: int;
+
 	var address: int = 0;
 
 	func _to_string():
@@ -192,10 +178,12 @@ class VTXVertex extends RefCounted:
 	var orig_mesh_vert_id: int;
 	var bone_id: Array[int] = [];
 
+	var address: int = 0;
+
 	func _to_string() -> String:
 		return "VTXVertex: {bone_weight_index: %s, num_bones: %d, orig_mesh_vertID: %d, bone_id: %s}" % [bone_weight_index, num_bones, orig_mesh_vert_id, bone_id];
 
-var header = {};
+var header: VTXHeader;
 var body_parts = [];
 var file: FileAccess;
 
@@ -212,19 +200,12 @@ func _init(file_path: String) -> void:
 			push_error("Failed to open file: %s" % file_path);
 			return;
 	
-	header = ByteReader.read_by_structure(file, VTXHeader, VTXHeader.scheme);
+	header = ByteReader.read_by_structure(file, VTXHeader);
 
 	_read_body_parts(header, file);
 
 func _read_body_parts(header: VTXHeader, file: FileAccess):
-	file.seek(header.body_part_offset);
-
-	for i in range(header.num_body_parts):
-		var address = file.get_position();
-		var body_part = ByteReader.read_by_structure(file, VTXBodyPart, VTXBodyPart.scheme);
-		body_part.address = address;
-
-		body_parts.append(body_part);
+	body_parts = ByteReader.read_array(file, header, "body_part_offset", "num_body_parts", VTXBodyPart) as Array[VTXBodyPart];
 
 	for body_part in body_parts:
 		_read_models(body_part, file);
@@ -232,51 +213,26 @@ func _read_body_parts(header: VTXHeader, file: FileAccess):
 	return body_parts;
 
 func _read_models(body_part: VTXBodyPart, file: FileAccess):
-	file.seek(body_part.address + body_part.model_offset);
-
-	for i in range(body_part.num_models):
-		var address = file.get_position();
-		var model = ByteReader.read_by_structure(file, VTXModel, VTXModel.scheme);
-		model.address = address;
-
-		body_part.models.append(model);
+	body_part.models = ByteReader.read_array(file, body_part, "model_offset", "num_models", VTXModel) as Array[VTXModel];
 
 	for model in body_part.models:
 		_read_lods(model, file);
 
 func _read_lods(model: VTXModel, file: FileAccess):
-	file.seek(model.address + model.lod_offset);
-
-	for i in range(1):
-		var address = file.get_position();
-		var lod = ByteReader.read_by_structure(file, VTXLod, VTXLod.scheme);
-		lod.address = address;
-
-		model.lods.append(lod);
+	# NOTE: Only reading the first LOD for now since Godot doesn't support custom LODs
+	model.lods.append(ByteReader.read_by_structure(file, VTXLod, model.address + model.lod_offset));
 		
 	for lod in model.lods:
 		_read_mesh_headers(lod, file);
 
 func _read_mesh_headers(lod: VTXLod, file: FileAccess):
-	file.seek(lod.address + lod.mesh_offset);
-
-	for i in range(lod.num_meshes):
-		var address = file.get_position();
-		var m = ByteReader.read_by_structure(file, VTXMesh, VTXMesh.scheme);
-		m.address = address;
-		lod.meshes.append(m);
+	lod.meshes = ByteReader.read_array(file, lod, "mesh_offset", "num_meshes", VTXMesh) as Array[VTXMesh];
 	
 	for mesh in lod.meshes:
 		_read_strip_groups(mesh, file);
 
 func _read_strip_groups(mesh: VTXMesh, file: FileAccess, debug = false):
-	file.seek(mesh.address + mesh.strip_group_offset);
-
-	for i in range(mesh.num_strip_groups):
-		var address = file.get_position();
-		var strip_group = ByteReader.read_by_structure(file, VTXStripGroup, VTXStripGroup.scheme);
-		strip_group.address = address;
-		mesh.strip_groups.append(strip_group);
+	mesh.strip_groups = ByteReader.read_array(file, mesh, "strip_group_offset", "num_strip_groups", VTXStripGroup);
 
 	for strip_group in mesh.strip_groups:
 		_read_vertices(strip_group, file);
@@ -292,16 +248,7 @@ func _read_indices(strip_group: VTXStripGroup, mesh: VTXMesh, file: FileAccess):
 	mesh.idx_base += strip_group.num_verts;
 
 func _read_vertices(strip_group: VTXStripGroup, file: FileAccess):
-	file.seek(strip_group.address + strip_group.vert_offset);
-
-	for j in range(strip_group.num_verts):
-		var vertex = ByteReader.read_by_structure(file, VTXVertex, VTXVertex.scheme);
-		strip_group.vertices.append(vertex);
+	strip_group.vertices = ByteReader.read_array(file, strip_group, "vert_offset", "num_verts", VTXVertex) as Array[VTXVertex];
 
 func _read_strip_headers(strip_group: VTXStripGroup, file: FileAccess):
-	file.seek(strip_group.address + strip_group.strip_offset);
-
-	for j in range(strip_group.num_strips):
-		var strip_header = ByteReader.read_by_structure(file, VTXStripHeader, VTXStripHeader.scheme);
-		strip_header.address = file.get_position() - VTXStripHeader.size;
-		strip_group.strips.append(strip_header);
+	strip_group.strips = ByteReader.read_array(file, strip_group, "strip_offset", "num_strips", VTXStripHeader) as Array[VTXStripHeader];

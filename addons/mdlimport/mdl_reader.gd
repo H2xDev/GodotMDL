@@ -183,6 +183,8 @@ class MDLHeader:
 	var studio_hdr2_index: int;
 	var unused3: int;
 
+	var address: int = 0;
+
 	func _to_string():
 		return "MDLHeader: {id: %s, version: %d, checksum: %d, name: %s, length: %d, eye_position: %s, illum_position: %s, hull_min: %s, hull_max: %s, view_bb_min: %s, view_bb_max: %s, flags: %s, bone_count: %d, bone_offset: %d, bone_controller_count: %d, bone_controller_offset: %d, hitbox_count: %d, hitbox_offset: %d, anim_count: %d, anim_offset: %d, local_anim_count: %d, local_anim_offset: %d, activity_list_version: %d, events_indexed: %d, texture_count: %d, texture_offset: %d, texturedir_count: %d, texturedir_offset: %d, skinref_count: %d, skinfamily_count: %d, skin_offset: %d, bodypart_count: %d, bodypart_offset: %d, attachment_count: %d, attachment_offset: %d, local_node_count: %d, local_node_index: %d, local_node_name_index: %d, flex_desc_count: %d, flex_desc_index: %d, flex_controller_count: %d, flex_controller_index: %d, ikchain_count: %d, ikchain_index: %d, mouth_count: %d, mouth_offset: %d, local_pose_param_count: %d, local_pose_param_index: %d, surface_prop_index: %d, key_value_index: %d, key_value_size: %d, ik_lock_count: %d, ik_lock_index: %d, mass: %f, contents: %d, include_model_count: %d, include_model_index: %d, virtual_model: %d, anim_block_name_index: %d, anim_block_count: %d, anim_block_index: %d, anim_block_model_index: %d, bone_table_name_index: %d, vertex_base: %d, offset_base: %d, directional_light_dot: %d, root_lod: %d, allowed_root_lod: %d, unused0: %d, unused1: %d, flex_controller_ui_count: %d, flex_controller_ui_index: %d, vert_anim_fixed_point_scale: %f, unused2: %d, studio_hdr: %d, unused3: %d}" % [id, version, checksum, name, length, eye_position, illum_position, hull_min, hull_max, view_bb_min, view_bb_max, flags, bone_count, bone_offset, bone_controller_count, bone_controller_offset, hitbox_count, hitbox_offset, anim_count, anim_offset, local_anim_count, local_anim_offset, activity_list_version, events_indexed, texture_count, texture_offset, texturedir_count, texturedir_offset, skinref_count, skinfamily_count, skin_offset, bodypart_count, bodypart_offset, attachment_count, attachment_offset, local_node_count, local_node_index, local_node_name_index, flex_desc_count, flex_desc_index, flex_controller_count, flex_controller_index, ikchain_count, ikchain_index, mouth_count, mouth_offset, local_pose_param_count, local_pose_param_index, surface_prop_index, key_value_index, key_value_size, ik_lock_count, ik_lock_index, mass, contents, include_model_count, include_model_index, virtual_model, anim_block_name_index, anim_block_count, anim_block_index, anim_block_model_index, bone_table_name_index, vertex_base, offset_base, directional_light_dot, root_lod, allowed_root_lod, unused0, unused1, flex_controller_ui_count, flex_controller_ui_index, vert_anim_fixed_point_scale, unused2, studio_hdr2_index, unused3];
 
@@ -206,6 +208,8 @@ class MDLTexture:
 	var material: int;
 	var client_material: int;
 	var unused2: Array[int];
+
+	var address: int = 0;
 
 	func _to_string():
 		return "MDLTexture: {name: %s, flags: %d, used: %d, unused: %d, material: %d, client_material: %d, unused2: %s}" % [name, flags, used, unused, material, client_material, unused2];
@@ -252,6 +256,8 @@ class MDLBone:
 	var unused: Array[int];
 	var surface_prop: String;
 
+	var address: int = 0;
+
 	func _to_string():
 		return "MDLBone: {name: %s, parent: %d, bonecontrollers: %s, pos: %s, quat: %s, rot: %s, pos_scale: %s, rot_scale: %s, pos_to_bone: %s, q_alignment: %s, flags: %d, proc_type: %d, proc_index: %d, physics_bone: %d, surface_prop_index: %d, contents: %d, unused: %s}" % [name, parent, bonecontrollers, pos, quat, rot, pos_scale, rot_scale, pos_to_bone, q_alignment, flags, proc_type, proc_index, physics_bone, surface_prop_index, contents, unused];
 
@@ -296,6 +302,8 @@ class MDLMovement:
 	var angle: float;
 	var vector: Vector3;
 	var position: Vector3;
+
+	var address: int = 0;
 
 class MDLIKRule:
 	static var scheme:
@@ -366,9 +374,6 @@ class MDLBodyPart:
 		model_index 									= ByteReader.Type.INT,
 	}
 
-	static var size: int:
-		get: return 16;
-
 	var name: String;
 	var name_index: int;
 	var num_models: int;
@@ -376,7 +381,7 @@ class MDLBodyPart:
 	var model_index: int;
 
 	var address: int = 0;
-	var models = [];
+	var models: Array = [];
 
 	func _to_string():
 		return "MDLBodyPart: {name: %s, name_index: %d, num_models: %d, base: %d, model_index: %d}" % [name, name_index, num_models, base, model_index];
@@ -399,9 +404,6 @@ class MDLModel:
 		unused 											= [ByteReader.Type.INT, 10],
 	}
 
-	static var size: int:
-		get: return 148;
-
 	var name: String;
 	var type: int;
 	var bounding_radius: float;
@@ -419,7 +421,7 @@ class MDLModel:
 	var flex_index: int;
 
 	var address: int = 0;
-	var meshes: Array[MDLMesh] = [];
+	var meshes: Array = [];
 
 	func _to_string():
 		return "MDLModel: {name: %s, type: %d, bounding_radius: %f, num_meshes: %d, mesh_offset: %d, num_verts: %d, vert_index: %d, tangents_index: %d, num_attachments: %d, attachment_index: %d, num_eyeballs: %d, eyeball_index: %d, unused: %s}" % [name, type, bounding_radius, num_meshes, mesh_offset, num_verts, vert_index, tangents_index, num_attachments, attachment_index, num_eyeballs, eyeball_index, unused];
@@ -463,11 +465,11 @@ class MDLMesh:
 
 
 var header: MDLHeader;
-var textureDirs: Array[String] = [];
-var textures: Array[MDLTexture] = [];
-var bones: Array[MDLBone] = [];
-var bone_controllers: Array[MDLBoneController] = [];
-var body_parts: Array[MDLBodyPart] = [];
+var textureDirs: Array = [];
+var textures: Array = [];
+var bones: Array = [];
+var bone_controllers: Array = [];
+var body_parts: Array = [];
 var file: FileAccess;
 
 func done():
@@ -477,7 +479,7 @@ func _init(source_path: String):
 	file = FileAccess.open(source_path, FileAccess.READ);
 	if file == null: return;
 
-	header = ByteReader.read_by_structure(file, MDLHeader, MDLHeader.scheme);
+	header = ByteReader.read_by_structure(file, MDLHeader);
 
 	_read_texture_data();
 	_read_bones();
@@ -486,64 +488,30 @@ func _init(source_path: String):
 func _read_body_parts():
 	file.seek(header.bodypart_offset);
 
-	for i in range(header.bodypart_count):
-		var address = file.get_position();
-		var bodypart = ByteReader.read_by_structure(file, MDLBodyPart, MDLBodyPart.scheme);
-		bodypart.address = address;
-		body_parts.append(bodypart);
-
+	body_parts = ByteReader.read_array(file, header, "bodypart_offset", "bodypart_count", MDLBodyPart);
 
 	for bodypart in body_parts:
-		file.seek(bodypart.address + bodypart.name_index);
-		bodypart.name = ByteReader.read_string(file);
-
-		file.seek(bodypart.address + bodypart.model_index);
-
-		for i in range(bodypart.num_models):
-			var address = file.get_position();
-			var model = ByteReader.read_by_structure(file, MDLModel, MDLModel.scheme);
-			model.address = address;
-			bodypart.models.append(model);
+		bodypart.name = ByteReader.read_string(file, bodypart.address + bodypart.name_index);
+		bodypart.models = ByteReader.read_array(file, bodypart, "model_index", "num_models", MDLModel);
 
 		for model in bodypart.models:
-			file.seek(model.address + model.mesh_offset);
-
-			for i in range(model.num_meshes):
-				var address = file.get_position();
-				var mesh = ByteReader.read_by_structure(file, MDLMesh, MDLMesh.scheme);
-				mesh.address = address;
-				model.meshes.append(mesh);
+			model.meshes = ByteReader.read_array(file, model, "mesh_offset", "num_meshes", MDLMesh);
 
 
 func _read_texture_data():
 	file.seek(header.texturedir_offset);
 	for i in range(header.texturedir_count):
-		file.seek(file.get_32());
-		textureDirs.append(ByteReader.read_string(file));
+		textureDirs.append(ByteReader.read_string(file, file.get_32()));
 
-	file.seek(header.texture_offset);
-	for i in range(header.texture_count):
-		var texture = ByteReader.read_by_structure(file, MDLTexture, MDLTexture.scheme);
-
-		file.seek(header.texture_offset + texture.name_offset);
-		texture.name = ByteReader.read_string(file);
-
-		textures.append(texture);
+	textures = ByteReader.read_array(file, header, "texture_offset", "texture_count", MDLTexture);
+	for texture in textures:
+		texture.name = ByteReader.read_string(file, texture.address + texture.name_offset);
 
 func _read_bones():
-	file.seek(header.bone_offset);
-	for i in range(header.bone_count):
-		var bone = ByteReader.read_by_structure(file, MDLBone, MDLBone.scheme);
+	bones = ByteReader.read_array(file, header, "bone_offset", "bone_count", MDLBone);
 
-		file.seek(header.bone_offset + bone.name_offset);
-		bone.name = ByteReader.read_string(file);
+	for bone in bones:
+		bone.name = ByteReader.read_string(file, bone.address + bone.name_offset);
+		bone.surface_prop = ByteReader.read_string(file, bone.address + bone.surface_prop_index);
 
-		file.seek(bone.surface_prop_index);
-		bone.surface_prop = ByteReader.read_string(file);
-
-		bones.append(bone);
-
-	file.seek(header.bone_controller_offset);
-	for i in range(header.bone_controller_count):
-		var bone_controller = ByteReader.read_by_structure(file, MDLBoneController, MDLBoneController.scheme);
-		bone_controllers.append(bone_controller);
+	bone_controllers = ByteReader.read_array(file, header, "bone_controller_offset", "bone_controller_count", MDLBoneController);

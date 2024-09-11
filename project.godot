@@ -17,3 +17,10 @@ config/icon="res://icon.svg"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/mdlimport/plugin.cfg")
+
+[importer_defaults]
+
+MDL={
+"materials_root": "",
+"scale": 0.025
+}

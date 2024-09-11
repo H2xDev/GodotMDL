@@ -1,15 +1,5 @@
 class_name ByteReader extends RefCounted
 
-## Returns data based on specified structure
-##
-## Structure example:
-## {
-## 	version = TYPE_INT,
-## 	author = TYPE_STRING,
-## 	created = TYPE_STRING,
-## 	updated = TYPE_STRING,
-## }
-
 enum Type {
 	INT = TYPE_INT,
 	STRING = TYPE_STRING,
@@ -28,11 +18,34 @@ enum Type {
 	MAT3X4 = 109,
 }
 
-static func read_by_structure(file: FileAccess, Clazz, structure: Dictionary):
+static func read_array(file: FileAccess, root_structure, offset_field: String, count_field: String, Clazz):
+	var address = root_structure.address if "address" in root_structure else 0;
+	var count = root_structure[count_field] if count_field in root_structure else 0;
+	var offset = root_structure[offset_field] if offset_field in root_structure else 0;
+
+	file.seek(address + offset);
+	var result = [];
+
+	for i in range(count):
+		result.append(read_by_structure(file, Clazz));
+
+	return result;
+
+static func read_by_structure(file: FileAccess, Clazz, read_from = -1):
 	var result = Clazz.new();
 
-	for key in structure.keys():
-		var type = structure[key];
+	if read_from > -1:
+		file.seek(read_from);
+
+	if "scheme" not in Clazz:
+		push_error("ByteReader: Scheme not found in class: " + Clazz.name);
+		return null;
+
+	if "address" in result:
+		result.address = file.get_position();
+
+	for key in Clazz.scheme.keys():
+		var type = Clazz.scheme[key];
 		var elements_count = -1;
 
 		if type is Array:
@@ -85,7 +98,7 @@ static func _read_data(file: FileAccess, type: Type):
 				return file.get_8();
 
 			Type.VECTOR3:
-				return Vector3(file.get_float(), file.get_float(), file.get_float());
+				return _convert_vector(Vector3(file.get_float(), file.get_float(), file.get_float()));
 
 			Type.VECTOR2:
 				return Vector2(file.get_float(), file.get_float());
@@ -119,9 +132,15 @@ static func _read_data(file: FileAccess, type: Type):
 static func _convert_plane(plane: Plane):
 	return Plane(plane.normal.x, plane.normal.z, plane.normal.y, plane.d);
 	
+## Converts vector from z-up to y-up
+static func _convert_vector(vector: Vector3):
+	return Vector3(vector.x, vector.z, -vector.y);
 
 ## Reads string of the file till null character
-static func read_string(file: FileAccess):
+static func read_string(file: FileAccess, offset: int = -1):
+	if offset > -1:
+		file.seek(offset);
+
 	var index = 0;
 	var result = "";
 	var char = file.get_8();
