@@ -1,13 +1,6 @@
 @tool
 class_name MDLImporter extends EditorImportPlugin
 
-enum StripGroup {
-	FLEXED = 0x01,
-	HWSKINNED = 0x02,
-	DELTA_FLEXED = 0x04,
-	SUPPRESS_HW_MORPH = 0x08,
-}
-
 func _get_importer_name(): return "MDL"
 func _get_visible_name(): return "MDL"
 func _get_recognized_extensions(): return ["mdl"];
@@ -15,7 +8,8 @@ func _get_save_extension(): return "tscn";
 func _get_resource_type(): return "PackedScene";
 func _get_priority(): return 1;
 func _get_preset_count(): return 0;
-func _get_import_order(): return 1;
+func _get_import_order(): return 2;
+func _can_import_threaded(): return false;
 
 func _get_import_options(str, int):
 	return [

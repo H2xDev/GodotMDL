@@ -77,26 +77,34 @@ static func read_by_structure(file: FileAccess, Clazz, read_from = -1):
 
 static func _read_data(file: FileAccess, type: Type):
 	match type:
-		Type.INT: 						return file.get_buffer(4).decode_s32(0);
-		Type.STRING: 					return char(file.get_8());
 		Type.FLOAT: 					return file.get_float();
-		Type.SHORT: 					return file.get_buffer(2).decode_s16(0);
-		Type.CHAR: 						return char(file.get_8());
 		Type.BYTE: 						return file.get_8();
-		Type.QUATERNION: 				return _read_quaternion(file);
-		Type.VECTOR3: 					return _read_vector(file);
-		Type.VECTOR2: 					return Vector2(file.get_float(), file.get_float());
-		Type.TANGENT: 					return _convert_plane(Plane(file.get_float(), file.get_float(), file.get_float(), file.get_float()));
+		Type.INT: 						return file.get_buffer(4).decode_s32(0);
+		Type.SHORT: 					return read_signed_short(file);
 		Type.LONG: 						return file.get_buffer(8).decode_s64(0);
-		Type.UNSIGNED_SHORT: 			return file.get_buffer(2).decode_u16(0);
-		Type.UNSIGNED_CHAR: 			return file.get_buffer(1).decode_u8(0);
+		Type.UNSIGNED_SHORT: 			return file.get_16();
+		Type.UNSIGNED_CHAR: 			return file.get_8();
+
+		Type.STRING: 					return char(file.get_8());
+		Type.CHAR: 						return char(file.get_8());
+		Type.VECTOR2: 					return Vector2(file.get_float(), file.get_float());
+
 		Type.STRING_NULL_TERMINATED: 	return read_string(file);
-		Type.MAT3X4: 					return _read_transform_3d(file);
-		Type.EULER_VECTOR: 				return _read_euler_vector(file);
+		Type.QUATERNION: 				return read_quaternion(file);
+		Type.VECTOR3: 					return read_vector(file);
+		Type.TANGENT: 					return read_plane(file);
+		Type.MAT3X4: 					return read_transform_3d(file);
+		Type.EULER_VECTOR: 				return read_euler_vector(file);
 		_: return type;
 
+static func read_signed_short(file: FileAccess):
+	var value = file.get_16();
+	if value > 32767:
+		value -= 65536;
+	return value;
+
 ## Matrix 3x4 to Transform3D
-static func _read_transform_3d(file: FileAccess):
+static func read_transform_3d(file: FileAccess):
 	var transform = Transform3D();
 	var yup_transform = Transform3D(Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(0, -1, 0), Vector3(0, 0, 0));
 
@@ -116,19 +124,20 @@ static func _read_transform_3d(file: FileAccess):
 	return (transform * yup_transform).orthonormalized();
 
 ## Converts euler vector from z-up to y-up
-static func _read_euler_vector(file: FileAccess):
+static func read_euler_vector(file: FileAccess):
 	return Vector3(file.get_float(), file.get_float(), file.get_float());
 
 ## Converts plane from z-up to y-up
-static func _convert_plane(plane: Plane):
+static func read_plane(file: FileAccess):
+	var plane = Plane(file.get_float(), file.get_float(), file.get_float(), file.get_float());
 	return Plane(plane.normal.x, plane.normal.z, plane.normal.y, plane.d);
 
-static func _read_vector(file: FileAccess):
+static func read_vector(file: FileAccess):
 	var vector = Vector3(file.get_float(), file.get_float(), file.get_float());
 
 	return Vector3(vector.x, vector.z, -vector.y);
 
-static func _read_quaternion(file: FileAccess):
+static func read_quaternion(file: FileAccess):
 	var q = Quaternion(file.get_float(), file.get_float(), file.get_float(), file.get_float());
 
 	# Convert quaternion from z-up to y-up

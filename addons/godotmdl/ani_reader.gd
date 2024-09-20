@@ -58,24 +58,67 @@ class ANIAnimation:
 
   var address: int = 0;
   var name: String = "";
+  var blocks: Array = [];
+  var movements: Array = [];
 
   func _to_string():
     return ByteReader.get_structure_string("ANIAnimation", self, ["name"]);
 
-class ANIKeyframes:
+class ANIMovement:
   static var scheme:
-    get: return {}
+    get: return {
+      endframe = ByteReader.Type.INT,
+      motion_flags = ByteReader.Type.INT,
+      v0 = ByteReader.Type.FLOAT,
+      v1 = ByteReader.Type.FLOAT,
+      angle = ByteReader.Type.FLOAT,
+      vector = ByteReader.Type.VECTOR3,
+      position = ByteReader.Type.VECTOR3,
+    }
+
+
+  var endframe: int;
+  var motion_flags: int;
+  var v0: float;
+  var v1: float;
+  var angle: float;
+  var vector: Vector3;
+  var position: Vector3;
+
+  var address: int = 0;
+
+  func _to_string():
+    return ByteReader.get_structure_string("ANIMovement", self);
+
+# mstudioanim_t
+class ANIAnimBlock:
+  static var scheme:
+    get: return {
+      bone = ByteReader.Type.BYTE,
+      flags = ByteReader.Type.BYTE,
+    }
+
+  var bone_index: int;
+  var bone: int;
+  var flags: int;
+  var next_offset: int;
+  var offsets: Array[int] = [];
+
+  var address: int = 0;
+
+  func _to_string():
+    return ByteReader.get_structure_string("ANIAnimBlock", self);
 
 var header: MDLReader.MDLHeader;
 var file: FileAccess;
-var anim_blocks: Array = [];
+var anims: Array = [];
 
 
 func _init(source_file: String, mdl_header: MDLReader.MDLHeader):
   file = FileAccess.open(source_file, FileAccess.READ);
   header = mdl_header;
 
-  file.seek(header.address);
+  file.seek(header.local_anim_offset);
 
   _read_animations();
 
@@ -83,7 +126,16 @@ func _init(source_file: String, mdl_header: MDLReader.MDLHeader):
 
 # TODO: Implement animation reading
 func _read_animations():
-  anim_blocks = ByteReader.read_array(file, header, "anim_offset", "anim_count", ANIAnimation);
+  anims = ByteReader.read_array(file, header, "anim_offset", "anim_count", ANIAnimation);
 
-  for anim in anim_blocks:
+  for anim in anims:
     anim.name = ByteReader.read_string(file, anim.address + anim.name_offset);
+
+    print(anim);
+
+  for anim in anims:
+    var old_adress = anim.address;
+    anim.blocks = ByteReader.read_array(file, anim, "anim_offset", "anim_block", ANIAnimBlock);
+
+  print(anims[0].blocks[0]);
+

@@ -16,7 +16,7 @@ config/icon="res://icon.svg"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/mdlimport/plugin.cfg")
+enabled=PackedStringArray("res://addons/godotvmt/plugin.cfg")
 
 [importer_defaults]
 

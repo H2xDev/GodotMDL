@@ -54,6 +54,8 @@ static func generate_mesh(mdl: MDLReader, vtx: VTXReader, vvd: VVDReader, option
 		_process_body_part.call(body_part, body_part_index);
 		body_part_index += 1;
 
+	
+	_assign_materials(array_mesh, mdl);
 
 	var skeleton = _generate_skeleton(mdl, options)
 	var skin = skeleton.create_skin_from_rest_transforms();
@@ -94,6 +96,10 @@ static func _generate_skeleton(mdl: MDLReader, options: Dictionary) -> Skeleton3
 		skeleton.reset_bone_pose(bone.id);
 
 	return skeleton;
+
+static func _assign_materials(mesh: ArrayMesh, mdl: MDLReader):
+	print(mdl.textureDirs);
+	pass;
 
 static func _convert_vector(v: Vector3) -> Vector3:
 	return Vector3(v.x, v.z, -v.y);
