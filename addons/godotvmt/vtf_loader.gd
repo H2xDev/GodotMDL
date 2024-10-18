@@ -174,6 +174,9 @@ var frame_duration = 0;
 var path = '';
 var alpha = false;
 
+var file_name: String = '':
+	get: return path.get_file().get_basename();
+
 func seek(v: int):
 	file.seek(v);
 	return file;
@@ -207,7 +210,7 @@ func compile_texture():
 		tex.frames = frames;
 
 		for frame in range(0, frames):
-			tex.set_frame_texture(frame, await _read_frame(frame));
+			tex.set_frame_texture(frame, _read_frame(frame));
 			tex.set_frame_duration(frame, frame_duration);
 
 	else:
@@ -227,6 +230,7 @@ func _read_frame(frame):
 	var byteRead = 0;
 	var isDXT1 = hires_image_format == ImageFormat.IMAGE_FORMAT_DXT1;
 	var format = format_map[str(hires_image_format)];
+	var use_mipmaps = not (flags & Flags.TEXTUREFLAGS_NOMIP);
 
 	frame = frames - 1 - frame;
 
@@ -242,13 +246,17 @@ func _read_frame(frame):
 
 		byteRead += mip_size + mip_size * (frames - 1);
 
-	var img = Image.create_from_data(width, height, true, format, data);
+	var img = Image.create_from_data(width, height, use_mipmaps, format, data);
 
 	alpha = img.detect_alpha();
 
 	if not img:
 		push_error("Corrupted file: {0}".format([file.get_path()]));
 		return null;
+
+	if flags & Flags.TEXTUREFLAGS_NORMAL:
+		img.decompress()
+		img.normal_map_to_xy();
 
 	return ImageTexture.create_from_image(img);
 

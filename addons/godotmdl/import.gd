@@ -9,6 +9,7 @@ func _get_resource_type(): return "PackedScene";
 func _get_priority(): return 1;
 func _get_preset_count(): return 0;
 func _get_import_order(): return 2;
+
 func _can_import_threaded(): return false;
 
 func _get_import_options(str, int):
@@ -31,14 +32,15 @@ func _get_option_visibility(path: String, optionName: StringName, options: Dicti
 
 func _import(mdl_path: String, save_path: String, options: Dictionary, _platform_variants, _gen_files):
 	var vtx_path = mdl_path.replace(".mdl", ".vtx");
-	var phy_path = mdl_path.replace(".mdl", ".phy");
 	var vvd_path = mdl_path.replace(".mdl", ".vvd");
-	var ani_path = mdl_path.replace(".mdl", ".ani");
+	var phy_path = mdl_path.replace(".mdl", ".phy");
+	# var ani_path = mdl_path.replace(".mdl", ".ani");
 
 	var mdl = MDLReader.new(mdl_path);
 	var vtx = VTXReader.new(vtx_path);
 	var vvd = VVDReader.new(vvd_path);
-	var ani = ANIReader.new(mdl_path, mdl.header);
+	var phy = PHYReader.new(phy_path);
+	# var ani = ANIReader.new(mdl_path, mdl.header);
 
 	var model_name = mdl_path.get_file().get_basename().replace(".mdl", "");
 
@@ -46,15 +48,23 @@ func _import(mdl_path: String, save_path: String, options: Dictionary, _platform
 		push_error("Error while reading MDL or VTX file.");
 		return false;
 
-	# var phy = PHYReader.new(phy_path);
+	var path_to_save = save_path + '.' + _get_save_extension();
+	var mesh_path = path_to_save + ".mesh.tres";
 
 	var scn = PackedScene.new();
-	var mesh_instance = MDLMeshGenerator.generate_mesh(mdl, vtx, vvd, options);
+	var model = MDLMeshGenerator.generate_mesh(mdl, vtx, vvd, phy, options);
+	model.set_name(model_name);
 
-	mesh_instance.set_name(model_name);
+	if ResourceLoader.exists(mesh_path):
+		DirAccess.remove_absolute(mesh_path);
 
-	scn.pack(mesh_instance);
+	var mesh = model.mesh;
+	var mesh_error = ResourceSaver.save(mesh, mesh_path, ResourceSaver.FLAG_CHANGE_PATH);
 
-	var path_to_save = save_path + '.' + _get_save_extension();
+	scn.pack(model);
 
-	return ResourceSaver.save(scn, path_to_save);
+	var error = ResourceSaver.save(scn, path_to_save);
+
+	model.queue_free();
+
+	return error;

@@ -183,6 +183,21 @@ class VTXVertex extends RefCounted:
 	func _to_string() -> String:
 		return "VTXVertex: {bone_weight_index: %s, num_bones: %d, orig_mesh_vertID: %d, bone_id: %s}" % [bone_weight_index, num_bones, orig_mesh_vert_id, bone_id];
 
+class VTXReplacement extends RefCounted:
+	static var scheme:
+		get: return {
+		replacements_count 							= ByteReader.Type.INT,
+		replacements_offset 						= ByteReader.Type.INT,
+	}
+
+	var replacements_count: int;
+	var replacements_offset: int;
+
+	var address: int = 0;
+
+	func _to_string() -> String:
+		return ByteReader.get_structure_string("VTXReplacement", self);
+
 var header: VTXHeader;
 var body_parts = [];
 var file: FileAccess;
@@ -199,11 +214,20 @@ func _init(file_path: String) -> void:
 	
 	header = ByteReader.read_by_structure(file, VTXHeader);
 
-	_read_body_parts(header, file);
+	_read_body_parts();
+	_read_materials_replacements();
 
 	file.close();
 
-func _read_body_parts(header: VTXHeader, file: FileAccess):
+func _read_materials_replacements():
+	if header.material_replacement_list_offset == 0:
+		return;
+
+	file.seek(header.material_replacement_list_offset);
+
+	var replacements = ByteReader.read_array(file, header, "material_replacement_list_offset", "num_lods", VTXReplacement);
+
+func _read_body_parts():
 	body_parts = ByteReader.read_array(file, header, "body_part_offset", "num_body_parts", VTXBodyPart) as Array[VTXBodyPart];
 
 	for body_part in body_parts:

@@ -16,7 +16,8 @@ enum Type {
 	STRING_NULL_TERMINATED 		= 13,
 	QUATERNION 					= 14,
 	MAT3X4 						= 15,
-	EULER_VECTOR 				= 16
+	EULER_VECTOR 				= 16,
+	VECTOR4 					= 17,
 }
 
 static func read_array(file: FileAccess, root_structure, offset_field: String, count_field: String, Clazz):
@@ -79,15 +80,16 @@ static func _read_data(file: FileAccess, type: Type):
 	match type:
 		Type.FLOAT: 					return file.get_float();
 		Type.BYTE: 						return file.get_8();
-		Type.INT: 						return file.get_buffer(4).decode_s32(0);
+		Type.INT: 						return read_signed_int(file);
 		Type.SHORT: 					return read_signed_short(file);
-		Type.LONG: 						return file.get_buffer(8).decode_s64(0);
+		Type.LONG: 						return file.get_64() - 0x80000000;
 		Type.UNSIGNED_SHORT: 			return file.get_16();
 		Type.UNSIGNED_CHAR: 			return file.get_8();
 
 		Type.STRING: 					return char(file.get_8());
 		Type.CHAR: 						return char(file.get_8());
 		Type.VECTOR2: 					return Vector2(file.get_float(), file.get_float());
+		Type.VECTOR4: 					return Vector4(file.get_float(), file.get_float(), file.get_float(), file.get_float());
 
 		Type.STRING_NULL_TERMINATED: 	return read_string(file);
 		Type.QUATERNION: 				return read_quaternion(file);
@@ -101,6 +103,12 @@ static func read_signed_short(file: FileAccess):
 	var value = file.get_16();
 	if value > 32767:
 		value -= 65536;
+	return value;
+
+static func read_signed_int(file: FileAccess):
+	var value = file.get_32();
+	if value > 2147483647:
+		value -= 4294967296;
 	return value;
 
 ## Matrix 3x4 to Transform3D

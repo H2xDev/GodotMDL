@@ -131,11 +131,8 @@ func _read_animations():
   for anim in anims:
     anim.name = ByteReader.read_string(file, anim.address + anim.name_offset);
 
-    print(anim);
-
+  # NOTE: Stuck here :c
   for anim in anims:
     var old_adress = anim.address;
     anim.blocks = ByteReader.read_array(file, anim, "anim_offset", "anim_block", ANIAnimBlock);
-
-  print(anims[0].blocks[0]);
 

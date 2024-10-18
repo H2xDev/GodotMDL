@@ -57,7 +57,7 @@ static func parse(filePath: String, keysToLower := false):
 			vector.z = values[2];
 			return vector;
 		if (_colorRegex.search(valueString)):
-			var color = {};
+			var color = Color(0, 0, 0, 0);
 			var m := _colorRegex.search(valueString);
 
 			color.r = m.get_string(1).to_float() / 255;

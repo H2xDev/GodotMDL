@@ -107,8 +107,6 @@ func _init(file_path: String) -> void:
 
 	header = ByteReader.read_by_structure(file, VVDHeader);
 
-	print(header);
-
 	fixups = ByteReader.read_array(file, header, "fixup_table_offset", "num_fixups", VVDFixupTable);
 
 	file.seek(header.vertex_data_offset);

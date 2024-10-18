@@ -9,8 +9,6 @@ func _get_resource_type(): return "Texture";
 func _get_preset_count(): return 0;
 func _get_import_order(): return 0;
 func _get_priority(): return 1;
-
-# NOTE: Disabled since sometimes it crashes the editor when importing a big bunch of textures
 func _can_import_threaded(): return false;
 
 func _get_import_options(str, int): return [];
@@ -22,5 +20,5 @@ func _import(path: String, save_path: String, _a, _b, _c):
 
 	if !vtf: return ERR_FILE_UNRECOGNIZED;
 
-	var texture = await vtf.compile_texture();
-	return ResourceSaver.save(texture, path_to_save)
+	var texture = vtf.compile_texture();
+	return ResourceSaver.save(texture, path_to_save, ResourceSaver.FLAG_CHANGE_PATH);

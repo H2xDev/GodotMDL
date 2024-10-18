@@ -56,7 +56,7 @@ class MDLHeader:
 		texture_offset 										= ByteReader.Type.INT,
 		texturedir_count 									= ByteReader.Type.INT,
 		texturedir_offset 									= ByteReader.Type.INT,
-		skinref_count 										= ByteReader.Type.INT,
+		skin_count											= ByteReader.Type.INT,
 		skinfamily_count  									= ByteReader.Type.INT,
 		skin_offset 										= ByteReader.Type.INT,
 		bodypart_count 										= ByteReader.Type.INT,
@@ -134,7 +134,7 @@ class MDLHeader:
 	var texture_offset: int;
 	var texturedir_count: int;
 	var texturedir_offset: int;
-	var skinref_count: int;
+	var skin_count: int;
 	var skinfamily_count: int;
 	var skin_offset: int;
 	var bodypart_count: int;
@@ -186,7 +186,7 @@ class MDLHeader:
 	var address: int = 0;
 
 	func _to_string():
-		return "MDLHeader: {id: %s, version: %d, checksum: %d, name: %s, length: %d, eye_position: %s, illum_position: %s, hull_min: %s, hull_max: %s, view_bb_min: %s, view_bb_max: %s, flags: %s, bone_count: %d, bone_offset: %d, bone_controller_count: %d, bone_controller_offset: %d, hitbox_count: %d, hitbox_offset: %d, anim_count: %d, anim_offset: %d, local_anim_count: %d, local_anim_offset: %d, activity_list_version: %d, events_indexed: %d, texture_count: %d, texture_offset: %d, texturedir_count: %d, texturedir_offset: %d, skinref_count: %d, skinfamily_count: %d, skin_offset: %d, bodypart_count: %d, bodypart_offset: %d, attachment_count: %d, attachment_offset: %d, local_node_count: %d, local_node_index: %d, local_node_name_index: %d, flex_desc_count: %d, flex_desc_index: %d, flex_controller_count: %d, flex_controller_index: %d, ikchain_count: %d, ikchain_index: %d, mouth_count: %d, mouth_offset: %d, local_pose_param_count: %d, local_pose_param_index: %d, surface_prop_index: %d, key_value_index: %d, key_value_size: %d, ik_lock_count: %d, ik_lock_index: %d, mass: %f, contents: %d, include_model_count: %d, include_model_index: %d, virtual_model: %d, anim_block_name_index: %d, anim_block_count: %d, anim_block_index: %d, anim_block_model_index: %d, bone_table_name_index: %d, vertex_base: %d, offset_base: %d, directional_light_dot: %d, root_lod: %d, allowed_root_lod: %d, unused0: %d, unused1: %d, flex_controller_ui_count: %d, flex_controller_ui_index: %d, vert_anim_fixed_point_scale: %f, unused2: %d, studio_hdr: %d, unused3: %d}" % [id, version, checksum, name, length, eye_position, illum_position, hull_min, hull_max, view_bb_min, view_bb_max, flags, bone_count, bone_offset, bone_controller_count, bone_controller_offset, hitbox_count, hitbox_offset, anim_count, anim_offset, local_anim_count, local_anim_offset, activity_list_version, events_indexed, texture_count, texture_offset, texturedir_count, texturedir_offset, skinref_count, skinfamily_count, skin_offset, bodypart_count, bodypart_offset, attachment_count, attachment_offset, local_node_count, local_node_index, local_node_name_index, flex_desc_count, flex_desc_index, flex_controller_count, flex_controller_index, ikchain_count, ikchain_index, mouth_count, mouth_offset, local_pose_param_count, local_pose_param_index, surface_prop_index, key_value_index, key_value_size, ik_lock_count, ik_lock_index, mass, contents, include_model_count, include_model_index, virtual_model, anim_block_name_index, anim_block_count, anim_block_index, anim_block_model_index, bone_table_name_index, vertex_base, offset_base, directional_light_dot, root_lod, allowed_root_lod, unused0, unused1, flex_controller_ui_count, flex_controller_ui_index, vert_anim_fixed_point_scale, unused2, studio_hdr2_index, unused3];
+		return ByteReader.get_structure_string("MDLHeader", self);
 
 class MDLTexture:
 	static var scheme: 
@@ -473,18 +473,38 @@ var bones: Array = [];
 var bone_controllers: Array = [];
 var body_parts: Array = [];
 var file: FileAccess;
+var materials: Array = [];
+var skin_families: Array = [];
+var source_path: String = "";
+
+var model_name:
+	get: return source_path.get_file().split(".")[0];
 
 func _init(source_path: String):
 	file = FileAccess.open(source_path, FileAccess.READ);
 	if file == null: return;
+
+	self.source_path = source_path;
 
 	header = ByteReader.read_by_structure(file, MDLHeader);
 
 	_read_texture_data();
 	_read_bones();
 	_read_body_parts();
+	_read_skin_families();
 
 	file.close();
+
+func _read_skin_families():
+	file.seek(header.skin_offset);
+
+	for i in range(header.skinfamily_count * header.skin_count):
+		var j = i / header.skin_count;
+
+		if skin_families.size() <= j:
+			skin_families.append([]);
+
+		skin_families[j].append(ByteReader._read_data(file, ByteReader.Type.SHORT));
 
 func _read_body_parts():
 	file.seek(header.bodypart_offset);
@@ -497,7 +517,6 @@ func _read_body_parts():
 
 		for model in bodypart.models:
 			model.meshes = ByteReader.read_array(file, model, "mesh_offset", "num_meshes", MDLMesh);
-
 
 func _read_texture_data():
 	file.seek(header.texturedir_offset);
